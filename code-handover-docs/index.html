@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Code Handover Doc Generator</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Code Handover Doc Generator</h1>
+      <div class="header-actions">
+        <button id="copyBtn" type="button" title="Copy Markdown">Copy</button>
+        <button id="downloadBtn" type="button" title="Download Markdown">Download</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="pane input-pane">
+        <form id="generatorForm" class="form" autocomplete="off">
+          <div class="field-row">
+            <label for="projectName">Project name</label>
+            <input id="projectName" name="projectName" type="text" placeholder="e.g., Payments Service" />
+          </div>
+
+          <div class="field-row">
+            <label for="repoUrl">Repository URL</label>
+            <input id="repoUrl" name="repoUrl" type="url" placeholder="e.g., https://github.com/org/repo or .../tree/main" />
+          </div>
+
+          <div class="field-row">
+            <label for="owner">Primary owner / team</label>
+            <input id="owner" name="owner" type="text" placeholder="e.g., Platform Team" />
+          </div>
+
+          <fieldset class="crawler">
+            <legend>Repository crawler (GitHub public)</legend>
+            <div class="field-grid">
+              <div class="field-row small">
+                <label for="ghToken">GitHub token (optional)</label>
+                <input id="ghToken" type="password" placeholder="Increases rate limits; stays in browser" />
+              </div>
+              <div class="field-row small">
+                <label for="ghMaxFiles">Max files</label>
+                <input id="ghMaxFiles" type="number" min="20" max="1000" step="10" value="200" />
+              </div>
+              <div class="field-row small">
+                <label for="ghMaxBytes">Max bytes per file</label>
+                <input id="ghMaxBytes" type="number" min="10240" max="524288" step="10240" value="204800" />
+              </div>
+              <div class="field-row small">
+                <label for="ghConcurrency">Concurrency</label>
+                <input id="ghConcurrency" type="number" min="1" max="8" step="1" value="4" />
+              </div>
+            </div>
+            <div class="actions">
+              <button id="scanBtn" type="button">Scan Repo</button>
+            </div>
+          </fieldset>
+
+          <div class="field-row">
+            <label for="language">Language</label>
+            <select id="language" name="language">
+              <option value="auto">Auto detect</option>
+              <option value="javascript">JavaScript / TypeScript</option>
+              <option value="python">Python</option>
+              <option value="java">Java</option>
+              <option value="go">Go</option>
+              <option value="csharp">C#</option>
+              <option value="php">PHP</option>
+              <option value="ruby">Ruby</option>
+              <option value="rust">Rust</option>
+              <option value="cpp">C / C++</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="field-row">
+            <label for="outputType">Output</label>
+            <select id="outputType" name="outputType">
+              <option value="handover">Handover Doc</option>
+              <option value="readme">README.md</option>
+            </select>
+          </div>
+
+          <div class="field-row">
+            <label for="context">Context (optional)</label>
+            <textarea id="context" name="context" rows="4" placeholder="Business purpose, deployment environment, SLAs, critical dependencies, etc."></textarea>
+          </div>
+
+          <div class="field-row">
+            <label for="code">Paste code here</label>
+            <textarea id="code" name="code" rows="14" placeholder="Paste one or more files. You can also drop a file here."></textarea>
+            <div class="hint">Tip: Drag & drop a file onto the code area to load it.</div>
+          </div>
+
+          <fieldset class="ai-settings">
+            <legend>AI mode</legend>
+            <div class="field-grid">
+              <label class="checkbox">
+                <input type="checkbox" id="enableAi" /> Enable AI generation
+              </label>
+              <div class="field-row small">
+                <label for="aiProvider">Provider</label>
+                <select id="aiProvider">
+                  <option value="openai">OpenAI</option>
+                  <option value="openrouter">OpenRouter</option>
+                  <option value="groq">Groq (free tier)</option>
+                  <option value="ollama">Ollama (local)</option>
+                </select>
+              </div>
+              <div class="field-row small">
+                <label for="aiModel">Model</label>
+                <select id="aiModel">
+                  <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+                  <option value="gpt-4.1">gpt-4.1</option>
+                  <option value="gpt-4o-mini">gpt-4o-mini</option>
+                  <option value="__custom__">Custom…</option>
+                </select>
+              </div>
+              <div class="field-row small" id="aiModelCustomRow" style="display:none">
+                <label for="aiModelCustom">Custom model</label>
+                <input id="aiModelCustom" type="text" placeholder="Enter model id" />
+              </div>
+              <div class="field-row small">
+                <label for="aiTemperature">Temperature</label>
+                <input id="aiTemperature" type="number" min="0" max="1" step="0.1" value="0.2" />
+              </div>
+              <div class="field-row small">
+                <label for="aiMaxTokens">Max tokens</label>
+                <input id="aiMaxTokens" type="number" min="256" max="4096" step="128" value="2048" />
+              </div>
+              <div class="field-row small">
+                <label for="aiMaxInputTokens">Max input tokens</label>
+                <input id="aiMaxInputTokens" type="number" min="4000" max="24000" step="500" value="12000" />
+              </div>
+              <div class="field-row small">
+                <label for="aiTpmLimit">TPM budget</label>
+                <input id="aiTpmLimit" type="number" min="10000" max="120000" step="1000" value="30000" />
+              </div>
+              <div class="field-row small">
+                <label for="aiSummaryTokens">Summary tokens/file</label>
+                <input id="aiSummaryTokens" type="number" min="128" max="1024" step="64" value="256" />
+              </div>
+              <label class="checkbox">
+                <input type="checkbox" id="aiHierarchy" /> Use hierarchical summarization when large
+              </label>
+              <div class="field-row">
+                <label for="aiKey">API key</label>
+                <input id="aiKey" type="password" placeholder="Paste your API key (Groq/OpenRouter/OpenAI). Ollama does not require a key." />
+              </div>
+            </div>
+            <div class="hint">For large repos, enable hierarchical summarization or reduce Max input tokens. The tool will summarize chunks first, then compose the final docs to stay within rate limits.</div>
+          </fieldset>
+
+          <div class="actions">
+            <button id="generateBtn" type="submit">Generate Documentation</button>
+            <button id="clearBtn" type="button" class="secondary">Clear</button>
+            <button id="sampleBtn" type="button" class="secondary">Load sample</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="pane output-pane">
+        <div class="output-header">
+          <h2>Generated Markdown</h2>
+        </div>
+        <div class="hint">logs</div>
+        <pre id="scanLog" class="log" aria-live="polite"></pre>
+        <pre id="output" class="output" aria-live="polite"></pre>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span>Local-only unless AI or GitHub crawler is enabled.</span>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
