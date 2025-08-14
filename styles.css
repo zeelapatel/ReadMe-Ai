@@ -146,10 +146,48 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.view-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.view-toggle {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.view-toggle:hover {
+  background: var(--bg-elev);
+}
+
+.view-toggle.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.output-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+button.small {
+  padding: 4px 8px;
+  font-size: 12px;
 }
 
 .output {
   margin: 0;
+  outline: none;
   white-space: pre-wrap;
   background: var(--bg-elev);
   border: 1px solid var(--border);
@@ -215,4 +253,109 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* GitHub Markdown Preview Styles */
+.preview {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  width: 100%;
+  overflow-y: auto;
+}
+
+.markdown-body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.markdown-body h1 {
+  padding-bottom: .3em;
+  font-size: 2em;
+  border-bottom: 1px solid var(--border);
+}
+
+.markdown-body h2 {
+  padding-bottom: .3em;
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border);
+}
+
+.markdown-body h3 {
+  font-size: 1.25em;
+}
+
+.markdown-body h4 {
+  font-size: 1em;
+}
+
+.markdown-body h5 {
+  font-size: .875em;
+}
+
+.markdown-body h6 {
+  font-size: .85em;
+  color: var(--muted);
+}
+
+.markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, 
+.markdown-body dl, .markdown-body table, .markdown-body pre, .markdown-body details {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.markdown-body blockquote {
+  padding: 0 1em;
+  color: var(--muted);
+  border-left: .25em solid var(--border);
+}
+
+.markdown-body ul, .markdown-body ol {
+  padding-left: 2em;
+}
+
+.markdown-body code {
+  padding: .2em .4em;
+  margin: 0;
+  font-size: 85%;
+  background-color: rgba(110,118,129,0.4);
+  border-radius: 6px;
+  font-family: ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace;
+}
+
+.markdown-body pre {
+  padding: 16px;
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  background-color: var(--bg);
+  border-radius: 6px;
+}
+
+.markdown-body pre code {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+}
+
+.markdown-body table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 100%;
+}
+
+.markdown-body table th, .markdown-body table td {
+  padding: 6px 13px;
+  border: 1px solid var(--border);
+}
+
+.markdown-body img {
+  max-width: 100%;
+  box-sizing: content-box;
+  background-color: transparent;
 }

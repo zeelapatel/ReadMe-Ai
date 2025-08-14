@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Code Handover Doc Generator</title>
     <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   </head>
   <body>
     <header class="app-header">
@@ -78,8 +79,8 @@
           <div class="field-row">
             <label for="outputType">Output</label>
             <select id="outputType" name="outputType">
-              <option value="handover">Handover Doc</option>
               <option value="readme">README.md</option>
+              <option value="handover">Handover Doc</option>
             </select>
           </div>
 
@@ -164,10 +165,22 @@
       <section class="pane output-pane">
         <div class="output-header">
           <h2>Generated Markdown</h2>
+          <div class="view-controls">
+            <button id="viewRaw" class="view-toggle active">Raw</button>
+            <button id="viewPreview" class="view-toggle">Preview</button>
+          </div>
         </div>
         <div class="hint">logs</div>
         <pre id="scanLog" class="log" aria-live="polite"></pre>
-        <pre id="output" class="output" aria-live="polite"></pre>
+        <div id="outputContainer">
+          <div class="output-actions">
+            <button id="editBtn" class="secondary small" title="Edit markdown">Edit</button>
+            <button id="saveBtn" class="small" style="display: none;" title="Save changes">Save</button>
+            <button id="cancelBtn" class="secondary small" style="display: none;" title="Cancel editing">Cancel</button>
+          </div>
+          <pre id="output" class="output" contenteditable="false" aria-live="polite"></pre>
+          <div id="preview" class="preview markdown-body" style="display: none;"></div>
+        </div>
       </section>
     </main>
 

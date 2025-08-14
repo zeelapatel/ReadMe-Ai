@@ -8,7 +8,15 @@
   const ownerEl = document.getElementById('owner');
   const outputTypeEl = document.getElementById('outputType');
   const outputEl = document.getElementById('output');
+  const previewEl = document.getElementById('preview');
+  const viewRawBtn = document.getElementById('viewRaw');
+  const viewPreviewBtn = document.getElementById('viewPreview');
+  const editBtn = document.getElementById('editBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
   const copyBtn = document.getElementById('copyBtn');
+  
+  let originalContent = '';
   const downloadBtn = document.getElementById('downloadBtn');
   const clearBtn = document.getElementById('clearBtn');
   const sampleBtn = document.getElementById('sampleBtn');
@@ -904,14 +912,22 @@ Be thorough and write as if the reader has never seen the code. Use Markdown hea
     if (isOn) {
       generateBtn.disabled = true;
       generateBtn.textContent = 'Generating…';
+      editBtn.disabled = true;
+      viewPreviewBtn.disabled = true;
+      copyBtn.disabled = true;
+      downloadBtn.disabled = true;
     } else {
       generateBtn.disabled = false;
       generateBtn.textContent = 'Generate Documentation';
+      editBtn.disabled = false;
+      viewPreviewBtn.disabled = false;
+      copyBtn.disabled = false;
+      downloadBtn.disabled = false;
     }
   }
 
   function buildReadmePrompt({ title, repoUrl, owner, badges, quickstart, scripts, endpoints, features, requirements, context, analysis }) {
-    const system = `You are a senior engineer writing a modern, polished README.md with emoji and clear sections. Use concise language, friendly tone, and professional formatting. Include shields.io badges if URLs are provided. Output only Markdown.`;
+    const system = `You are a senior engineer writing a modern, polished README.md with emoji and clear sections. Use concise language, friendly tone, and professional formatting. Include shields.io badges if URLs are provided. Output the content directly without any markdown code fences or language indicators.`;
     const user = trimMultiline(`
 Project: ${title}
 Repo: ${repoUrl || 'N/A'}
@@ -1026,7 +1042,7 @@ Packages: npm=${packages.npm.length}, py=${packages.python.length}, go=${package
         const analysis = buildAnalysisBlob({ inferredLang, imports, functions: fc.functions, classes: fc.classes, routes, envVars, packages });
         const messages = buildReadmePrompt({ title, repoUrl, owner, context, analysis });
         const md = await generateWithAi({ provider, apiKey, model, temperature, messages, max_tokens });
-        outputEl.textContent = md;
+        await typewriterEffect(outputEl, cleanMarkdown(md));
         logScan('README generated (direct).');
       } else {
         logScan('README hierarchical path…');
@@ -1043,7 +1059,7 @@ Packages: npm=${packages.npm.length}, py=${packages.python.length}, go=${package
         }
         const composeMessages = composeReadmeFromBatches({ title, repoUrl, owner, context, batchSummaries });
         const md = await generateWithAi({ provider, apiKey, model, temperature, messages: composeMessages, max_tokens });
-        outputEl.textContent = md;
+        await typewriterEffect(outputEl, cleanMarkdown(md));
         logScan('README generated (hierarchical).');
       }
     } catch (e) {
@@ -1121,6 +1137,110 @@ app.listen(port, () => console.log('listening on', port));
       btn.disabled = false;
     }, 800);
   }
+
+  // Preview functionality
+  function cleanMarkdown(text) {
+    // Remove any markdown code fence headers if present
+    return text.replace(/^```\w*\n/, '').replace(/\n```$/, '');
+  }
+
+  async function typewriterEffect(element, text, speed = 0.5) {
+    element.textContent = '';
+    const lines = text.split('\n');
+    const chunkSize = text.length > 1000 ? 3 : 1; // Process more chars at once for longer texts
+    
+    for (let line of lines) {
+      for (let i = 0; i < line.length; i += chunkSize) {
+        const chunk = line.slice(i, i + chunkSize);
+        element.textContent += chunk;
+        // Scroll to bottom as text appears
+        element.scrollTop = element.scrollHeight;
+        // Only delay every few characters for longer texts
+        if (i % (chunkSize * 2) === 0) {
+          await new Promise(resolve => setTimeout(resolve, speed));
+        }
+      }
+      element.textContent += '\n';
+    }
+    return true;
+  }
+
+  function updatePreview() {
+    if (!outputEl.textContent) return;
+    previewEl.innerHTML = marked.parse(cleanMarkdown(outputEl.textContent));
+  }
+
+  function showRaw() {
+    viewRawBtn.classList.add('active');
+    viewPreviewBtn.classList.remove('active');
+    outputEl.style.display = 'block';
+    previewEl.style.display = 'none';
+  }
+
+  function showPreview() {
+    viewPreviewBtn.classList.add('active');
+    viewRawBtn.classList.remove('active');
+    outputEl.style.display = 'none';
+    previewEl.style.display = 'block';
+    updatePreview();
+  }
+
+  // Set up preview toggle handlers
+  viewRawBtn.addEventListener('click', showRaw);
+  viewPreviewBtn.addEventListener('click', showPreview);
+
+  // Update preview when output changes
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'childList' && previewEl.style.display !== 'none') {
+        updatePreview();
+      }
+    });
+  });
+  
+  observer.observe(outputEl, { childList: true });
+
+  // Edit functionality
+  function startEditing() {
+    originalContent = outputEl.textContent;
+    outputEl.contentEditable = true;
+    outputEl.focus();
+    editBtn.style.display = 'none';
+    saveBtn.style.display = 'inline-block';
+    cancelBtn.style.display = 'inline-block';
+    viewPreviewBtn.disabled = true;
+    copyBtn.disabled = true;
+    downloadBtn.disabled = true;
+    
+    // Force raw view when editing
+    showRaw();
+  }
+
+  function saveEdits() {
+    outputEl.contentEditable = false;
+    editBtn.style.display = 'inline-block';
+    saveBtn.style.display = 'none';
+    cancelBtn.style.display = 'none';
+    viewPreviewBtn.disabled = false;
+    copyBtn.disabled = false;
+    downloadBtn.disabled = false;
+    updatePreview();
+  }
+
+  function cancelEdits() {
+    outputEl.textContent = originalContent;
+    outputEl.contentEditable = false;
+    editBtn.style.display = 'inline-block';
+    saveBtn.style.display = 'none';
+    cancelBtn.style.display = 'none';
+    viewPreviewBtn.disabled = false;
+    copyBtn.disabled = false;
+    downloadBtn.disabled = false;
+  }
+
+  editBtn.addEventListener('click', startEditing);
+  saveBtn.addEventListener('click', saveEdits);
+  cancelBtn.addEventListener('click', cancelEdits);
 
   codeEl.addEventListener('dragover', function(e) {
     e.preventDefault();
